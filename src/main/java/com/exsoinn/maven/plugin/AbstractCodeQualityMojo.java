@@ -23,6 +23,7 @@ public abstract class AbstractCodeQualityMojo extends AbstractMojo {
     @Parameter (defaultValue = "${session}")
     private MavenSession mavenSession;
 
+
     @Component
     private BuildPluginManager pluginManager;
 
@@ -31,10 +32,8 @@ public abstract class AbstractCodeQualityMojo extends AbstractMojo {
      *
      * @return
      */
-    String mojoName() {
-        Mojo mojoAnnot = this.getClass().getAnnotation(Mojo.class);
-        return mojoAnnot.name();
-    }
+    abstract String mojoName();
+
 
     String addMojoName(String pMsg) {
         return "[" + mojoName() + "]: " + pMsg;
@@ -57,6 +56,7 @@ public abstract class AbstractCodeQualityMojo extends AbstractMojo {
         plugin.setVersion("0.7.9");
         return plugin;
     }
+
 
 
     /*

@@ -73,8 +73,9 @@ public class CodeQualityVerifyMojo extends AbstractCodeQualityMojo {
      *     </limits>
      * </rule>
      *
-     * @param pEntry
-     * @param pRulesParentNode
+     * @param pEntry - Contains the info to generate the <rule/> node
+     * @param pRulesParentNode - The <rules/> parent node to which the newly create <rule/> node will
+     *                         be added.
      */
     private void addRuleNode(Map.Entry<String, List<Map<String, String>>> pEntry,
                              Xpp3Dom pRulesParentNode) {
@@ -103,5 +104,10 @@ public class CodeQualityVerifyMojo extends AbstractCodeQualityMojo {
         map.put(KEY_VALUE, pVal);
         map.put(KEY_MINIMUM, pMin);
         return map;
+    }
+
+    @Override
+    String mojoName() {
+        return "code-quality-verify";
     }
 }
