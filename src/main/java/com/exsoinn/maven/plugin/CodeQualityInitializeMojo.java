@@ -30,6 +30,10 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
 public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
     private static final String JACOCO_ARG_LINE_PROP_NAME = "jacocoArgLine";
     private static final String MAVEN_SITE_PLUGIN = "maven-site-plugin";
+    private static final String MAVEN_SUREFIRE_PLUGIN = "maven-surefire-plugin";
+    private static final String MAVEN_GROUP = "org.apache.maven.plugins:";
+    private static final String MAVEN_SITE_PLUGIN_KEY = MAVEN_GROUP + MAVEN_SITE_PLUGIN;
+    private static final String MAVEN_SUREFIRE_PLUGIN_KEY = MAVEN_GROUP + MAVEN_SUREFIRE_PLUGIN;
     static final List<String> reports;
 
     static {
@@ -86,9 +90,11 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
         info("The jacoco prepare-agent goal defined the following project property: "
                 + getProject().getProperties().getProperty(JACOCO_ARG_LINE_PROP_NAME));
         autoConfigureMavenSitePlugin(getProject());
+        autoConfigureMavenSurefirePlugin(getProject());
         info("Adding plugins to reporting section...");
         addReportingPlugins(getProject().getModel().getReporting());
-        info("Done adding plugins to reporting section.");
+        info("Done adding plugins to reporting section. New POM model is:");
+        info(getProject().getModel().toString());
     }
 
 
@@ -102,9 +108,9 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
     void autoConfigureMavenSitePlugin(MavenProject pProject ) {
         getLog().info("Re-configuring " + MAVEN_SITE_PLUGIN + "...");
         Plugin p;
-        if (null == (p = pProject.getBuild().getPluginsAsMap().get(MAVEN_SITE_PLUGIN))) {
+        if (null == (p = pProject.getBuild().getPluginsAsMap().get(MAVEN_SITE_PLUGIN_KEY))) {
             p = plugin("org.apache.maven.plugins", MAVEN_SITE_PLUGIN, "3.6");
-            pProject.getModel().getBuild().getPluginsAsMap().put(MAVEN_SITE_PLUGIN, p);
+            pProject.getModel().getBuild().getPluginsAsMap().put(MAVEN_SITE_PLUGIN_KEY, p);
         }
         p.getDependencies().clear();
         addDependency("org.apache.maven.skins", "maven-fluido-skin", "1.6", p);
@@ -116,6 +122,64 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
         getLog().info("Done re-configuring " + MAVEN_SITE_PLUGIN + ".");
     }
 
+
+    void autoConfigureMavenSurefirePlugin(MavenProject pProject ) {
+        getLog().info("Re-configuring " + MAVEN_SUREFIRE_PLUGIN + "...");
+        Plugin p;
+        if (null == (p = pProject.getBuild().getPluginsAsMap().get(MAVEN_SUREFIRE_PLUGIN_KEY))) {
+            p = plugin("org.apache.maven.plugins", MAVEN_SUREFIRE_PLUGIN, "${maven.surefire.plugin.version}");
+            pProject.getModel().getBuild().getPluginsAsMap().put(MAVEN_SITE_PLUGIN_KEY, p);
+        }
+        p.getDependencies().clear();
+        addDependency("org.junit.platform", "junit-platform-surefire-provider", "1.0.1", p);
+        addDependency("org.junit.platform", "junit-jupiter-engine", "5.0.1", p);
+        Xpp3Dom conf = MojoExecutor.configuration();
+        p.setConfiguration(conf);
+        addSimpleTag("argLine", "${jacocoArgLine} -Xmx256m", conf);
+
+        PluginExecution pe = new PluginExecution();
+        pe.setId("default-test");
+        List<PluginExecution> peList = new ArrayList<>();
+        peList.add(pe);
+        p.setExecutions(peList);
+        getLog().info("Done re-configuring " + MAVEN_SITE_PLUGIN + ".");
+    }
+
+
+    /*-<plugin>
+
+<groupId>org.apache.maven.plugins</groupId>
+
+<artifactId>maven-surefire-plugin</artifactId>
+
+<version>${maven.surefire.plugin.version}</version>
+
+
+-<configuration>
+<!-- JaCoCo (2) Setup the argLine and run the unit tests. **NOTE the "jacocArgLine" property was configured the "prepare-agent" goal of Jacoco (see below). If you want to resolve the property value as late as possible (i.e. your dynamically alter this property value before reaching this phase), Maven gives you option to use @{jacocoArgLine} instead -->
+<argLine>${jacocoArgLine} -Xmx256m</argLine>
+
+</configuration>
+
+
+-<dependencies>
+-<dependency>
+<groupId>org.junit.platform</groupId>
+<artifactId>junit-platform-surefire-provider</artifactId>
+<version>1.0.1</version>
+</dependency>
+
+
+-<dependency>
+<groupId>org.junit.jupiter</groupId>
+<artifactId>junit-jupiter-engine</artifactId>
+<version>5.0.1</version>
+
+-<execution>
+<id>default-test</id>
+</execution>
+</executions>
+</plugin>
 
     /**
      * Dynamically add reporting plugins. We do this reasonably early enough so that they're
