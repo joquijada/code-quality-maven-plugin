@@ -128,11 +128,11 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
         Plugin p;
         if (null == (p = pProject.getBuild().getPluginsAsMap().get(MAVEN_SUREFIRE_PLUGIN_KEY))) {
             p = plugin("org.apache.maven.plugins", MAVEN_SUREFIRE_PLUGIN, "${maven.surefire.plugin.version}");
-            pProject.getModel().getBuild().getPluginsAsMap().put(MAVEN_SITE_PLUGIN_KEY, p);
+            pProject.getModel().getBuild().getPluginsAsMap().put(MAVEN_SUREFIRE_PLUGIN_KEY, p);
         }
         p.getDependencies().clear();
         addDependency("org.junit.platform", "junit-platform-surefire-provider", "1.0.1", p);
-        addDependency("org.junit.platform", "junit-jupiter-engine", "5.0.1", p);
+        addDependency("org.junit.jupiter", "junit-jupiter-engine", "5.0.1", p);
         Xpp3Dom conf = MojoExecutor.configuration();
         p.setConfiguration(conf);
         addSimpleTag("argLine", "${jacocoArgLine} -Xmx256m", conf);
