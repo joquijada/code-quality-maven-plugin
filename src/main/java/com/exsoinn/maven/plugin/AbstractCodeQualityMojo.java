@@ -12,6 +12,9 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.twdata.maven.mojoexecutor.MojoExecutor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  *
@@ -98,12 +101,16 @@ public abstract class AbstractCodeQualityMojo extends AbstractMojo {
     }
 
 
+
     void addDependency(String pGroupId, String pArtifactId, String pVersion, Plugin pTargetPlugin) {
         Dependency d = new Dependency();
         d.setGroupId(pGroupId);
         d.setArtifactId(pArtifactId);
         d.setVersion(pVersion);
-        pTargetPlugin.getDependencies().add(d);
+        List<Dependency> dependencies = new ArrayList<>();
+        dependencies.addAll(pTargetPlugin.getDependencies());
+        dependencies.add(d);
+        pTargetPlugin.setDependencies(dependencies);
     }
 
     /*

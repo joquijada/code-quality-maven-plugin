@@ -28,7 +28,8 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
  */
 @Mojo(name = "code-quality-initialize", defaultPhase = LifecyclePhase.INITIALIZE)
 public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
-    static final String JACOCO_ARG_LINE_PROP_NAME = "jacocoArgLine";
+    private static final String JACOCO_ARG_LINE_PROP_NAME = "jacocoArgLine";
+    private static final String MAVEN_SITE_PLUGIN = "maven-site-plugin";
     static final List<String> reports;
 
     static {
@@ -70,11 +71,18 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
     public void execute() throws MojoExecutionException, MojoFailureException {
         info("Jacoco will be run against this package: " + packageName);
         Plugin jacocoPlugin = createJacocoMavenPlugin();
-        Xpp3Dom configuration = MojoExecutor.configuration();
-        configureJacocoMavenPluginForInitialize(configuration, packageName);
-        executeMojo(jacocoPlugin, "prepare-agent", configuration, executionEnvironment(getProject(),
-                getMavenSession(), getPluginManager()));
 
+        /**
+         * We could introduce validate phase Mojo and re-configure Jacoco in that phase like we're doing
+         * for {@link this#MAVEN_SITE_PLUGIN} (autoConfigureMavenSitePlugin(getProject()) in this Mojo/phase, but since
+         * we have to execute Jacoco anyways on behalf of the project that uses this plugin,
+         * let's re-configure Jacoco here, right before it is needed.
+         * TODO: Account for scenario where project jas already configured Jacoco; need to clear configuration
+         * TODO: in that case, like we're doing for {@link this#MAVEN_SITE_PLUGIN}. Aslso this re-config stuff
+         * TODO: needs to be strongly documented in README.md.
+         */
+        executeMojo(jacocoPlugin, "prepare-agent", configureJacocoMavenPluginForInitialize(packageName),
+                executionEnvironment(getProject(), getMavenSession(), getPluginManager()));
         info("The jacoco prepare-agent goal defined the following project property: "
                 + getProject().getProperties().getProperty(JACOCO_ARG_LINE_PROP_NAME));
         autoConfigureMavenSitePlugin(getProject());
@@ -85,20 +93,27 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
 
 
     /**
-     * Auto-configures the "maven-site-plugin" to suit our needs, creating it first if not already
-     * present, else dependencies are cleared and added from scratch.
+     * Auto-configures the {@link this#MAVEN_SITE_PLUGIN} to suit our needs, creating it first if not already
+     * present, else dependencies are cleared and added from scratch. Why are we doing this here? Because
+     * we need this done before "site" phase. This Mojo is tied to "initialize" phase. Later we may
+     * refactor things better if there's room for improvement.
      * @param pProject
      */
     void autoConfigureMavenSitePlugin(MavenProject pProject ) {
-        getLog().info("Re-configuring maven-site-plugin...");
+        getLog().info("Re-configuring " + MAVEN_SITE_PLUGIN + "...");
         Plugin p;
-        if (null == (p = pProject.getBuild().getPluginsAsMap().get("maven-site-plugin"))) {
-            p = plugin("org.apache.maven.plugins", "maven-site-plugin", "3.6");
+        if (null == (p = pProject.getBuild().getPluginsAsMap().get(MAVEN_SITE_PLUGIN))) {
+            p = plugin("org.apache.maven.plugins", MAVEN_SITE_PLUGIN, "3.6");
+            pProject.getModel().getBuild().getPluginsAsMap().put(MAVEN_SITE_PLUGIN, p);
         }
         p.getDependencies().clear();
         addDependency("org.apache.maven.skins", "maven-fluido-skin", "1.6", p);
         addDependency("org.apache.maven.doxia", "doxia-module-markdown", "1.7", p);
-        getLog().info("Done re-configuring maven-site-plugin.");
+        Xpp3Dom conf = MojoExecutor.configuration();
+        p.setConfiguration(conf);
+        addSimpleTag("inputEncoding", "UTF-8", conf);
+        addSimpleTag("outputEncoding", "UTF-8", conf);
+        getLog().info("Done re-configuring " + MAVEN_SITE_PLUGIN + ".");
     }
 
 
@@ -192,15 +207,17 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo{
     }
 
 
-    private void configureJacocoMavenPluginForInitialize(Xpp3Dom pConfig, String pPkgName) {
+    private Xpp3Dom configureJacocoMavenPluginForInitialize(String pPkgName) {
+        Xpp3Dom jacocoConfig = MojoExecutor.configuration();
         Xpp3Dom propNameTag = new Xpp3Dom("propertyName");
         propNameTag.setValue(JACOCO_ARG_LINE_PROP_NAME);
-        pConfig.addChild(propNameTag);
+        jacocoConfig.addChild(propNameTag);
         Xpp3Dom includesParentNode = new Xpp3Dom("includes");
         Xpp3Dom includesChildNode = new Xpp3Dom("include");
         includesChildNode.setValue(pPkgName);
         includesParentNode.addChild(includesChildNode);
-        pConfig.addChild(includesParentNode);
+        jacocoConfig.addChild(includesParentNode);
+        return jacocoConfig;
     }
 
     @Override
