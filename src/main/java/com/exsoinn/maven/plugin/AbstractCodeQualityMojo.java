@@ -1,7 +1,9 @@
 package com.exsoinn.maven.plugin;
 
+import org.apache.maven.Maven;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
+import org.apache.maven.model.DistributionManagement;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.plugin.AbstractMojo;
@@ -20,6 +22,11 @@ import java.util.List;
  *
  */
 public abstract class AbstractCodeQualityMojo extends AbstractMojo {
+    static final String MAVEN_SITE_PLUGIN = "maven-site-plugin";
+    static final String MAVEN_SUREFIRE_PLUGIN = "maven-surefire-plugin";
+    static final String MAVEN_GROUP = "org.apache.maven.plugins:";
+    static final String MAVEN_SITE_PLUGIN_KEY = MAVEN_GROUP + MAVEN_SITE_PLUGIN;
+    static final String MAVEN_SUREFIRE_PLUGIN_KEY = MAVEN_GROUP + MAVEN_SUREFIRE_PLUGIN;
     /**
      * The current  project that Maven is building
      */
@@ -39,10 +46,15 @@ public abstract class AbstractCodeQualityMojo extends AbstractMojo {
 
     /**
      *
-     * @return
+     * @return - The name of this Mojo, child classes respnsuble for implementing
      */
     abstract String mojoName();
 
+    DistributionManagement buildDistributionManagement(MavenProject pProj) {
+        DistributionManagement dm = new DistributionManagement();
+        pProj.setDistributionManagement(dm);
+        return null;
+    }
 
     String addMojoName(String pMsg) {
         return "[" + mojoName() + "]: " + pMsg;
