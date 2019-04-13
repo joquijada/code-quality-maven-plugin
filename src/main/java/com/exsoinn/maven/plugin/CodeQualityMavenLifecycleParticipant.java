@@ -30,5 +30,10 @@ public class CodeQualityMavenLifecycleParticipant extends AbstractMavenLifecycle
 
     // Add the various reporting plugins
     codeQualityHelper.addReportingPlugins(pSession.getCurrentProject().getModel().getReporting());
+
+    // Configure the Site plugin
+    codeQualityHelper.autoConfigureMavenSitePlugin(pSession.getCurrentProject());
+    codeQualityHelper.LOGGER.info("Done dynamically reconfiguring the Maven model, final model is: "
+            + pSession.getCurrentProject().getModel());
   }
 }

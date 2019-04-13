@@ -65,7 +65,7 @@ class CodeQualityHelper {
   static final String MAVEN_SUREFIRE_PLUGIN_KEY = MAVEN_GROUP + MAVEN_SUREFIRE_PLUGIN;
   static final String JACOCO_ARG_LINE_PROP_NAME = "jacocoArgLine";
 
-  private static Logger LOGGER = LoggerFactory.getLogger(CodeQualityHelper.class);
+  static Logger LOGGER = LoggerFactory.getLogger(CodeQualityHelper.class);
 
   /**
    * This is required. It gives the location of the classes against which code quality check will
@@ -265,22 +265,31 @@ class CodeQualityHelper {
     pTargetPlugin.setDependencies(dependencies);
   }
 
+
+  Plugin autoConfigureMavenSitePlugin() {
+    return autoConfigureMavenSitePlugin(project);
+  }
+
   /**
    * Auto-configures the {@link CodeQualityHelper#MAVEN_SITE_PLUGIN} to suit our needs, creating it
    * first if not already present, else dependencies are cleared and added from scratch. Why are we
    * doing this here? Because we need this done before "site" phase. This Mojo is tied to
    * "initialize" phase. Later we may refactor things better if there's room for improvement.
    */
-  Plugin autoConfigureMavenSitePlugin() {
-    final String mspVersion = "3.6";
+  Plugin autoConfigureMavenSitePlugin(MavenProject pProject) {
+    final String mspVersion = "3.7.1";
     LOGGER.info("Re-configuring " + MAVEN_SITE_PLUGIN + "...");
     Plugin p;
-    if (null == (p = project.getBuild().getPluginsAsMap().get(MAVEN_SITE_PLUGIN_KEY))) {
-      p = plugin("org.apache.maven.plugins", MAVEN_SITE_PLUGIN, mspVersion);
-      project.getModel().getBuild().getPluginsAsMap().put(MAVEN_SITE_PLUGIN_KEY, p);
+    if (null == (p = pProject.getBuild().getPluginsAsMap().get(MAVEN_SITE_PLUGIN_KEY))) {
+      p = createMavenPlugin("org.apache.maven.plugins", MAVEN_SITE_PLUGIN, mspVersion);
+      pProject.getModel().getBuild().getPluginsAsMap().put(MAVEN_SITE_PLUGIN_KEY, p);
+    } else {
+      // If the Maven site plugin was already there in the model, override the version
+      // with ours. If we use the default version of 3.3, then get error described here:
+      // https://www.mkyong.com/maven/mvn-site-java-lang-classnotfoundexception-org-apache-maven-doxia-siterenderer-documentcontent/
+      p.setVersion(mspVersion);
     }
-    p.setVersion("3.6");
-    //getPluginManager().loadPlugin();
+
     p.getDependencies().clear();
     addDependency("org.apache.maven.skins", "maven-fluido-skin", "1.6", p);
     addDependency("org.apache.maven.doxia", "doxia-module-markdown", "1.7", p);
@@ -289,7 +298,7 @@ class CodeQualityHelper {
     addSimpleTag("inputEncoding", "UTF-8", conf);
     addSimpleTag("outputEncoding", "UTF-8", conf);
 
-    Map<String, Artifact> pluginArtifactMap = project.getPluginArtifactMap();
+    Map<String, Artifact> pluginArtifactMap = pProject.getPluginArtifactMap();
     Artifact msp = pluginArtifactMap.get(MAVEN_SITE_PLUGIN_KEY);
     msp.setVersion(mspVersion);
     LOGGER.info("Done re-configuring " + MAVEN_SITE_PLUGIN + ".");
@@ -353,15 +362,11 @@ class CodeQualityHelper {
     pReportingNode.addPlugin(createMavenReportPlugin("org.basepom.maven",
             "duplicate-finder-maven-plugin", "1.2.1"));
     pReportingNode.addPlugin(createMavenReportPlugin("org.apache.maven.plugins",
-            "maven-enforcer-plugin", "0.7.9"));
+            "maven-enforcer-plugin", "3.0.0-M1"));
     pReportingNode
             .addPlugin(
                     createMavenReportPlugin("org.codehaus.mojo", "license-maven-plugin", "1.14"));
 
-
-    /*
-     * Prepare the "maven-pmd-plugin" plugin
-     */
     ReportPlugin pmdPlugin = createMavenReportPlugin("org.apache.maven.plugins",
             "maven-pmd-plugin", "3.8");
     pReportingNode.addPlugin(pmdPlugin);
@@ -388,7 +393,7 @@ class CodeQualityHelper {
     vmpRptSet.addReport("plugin-updates-report");
     vmpRptSet.addReport("property-updates-report");
     versionsMavenPlugin.addReportSet(vmpRptSet);
-    LOGGER.info("Done adding plugins to reporting section. New POM model is:");
+    LOGGER.info("Done adding plugins to reporting section.");
   }
 
 
