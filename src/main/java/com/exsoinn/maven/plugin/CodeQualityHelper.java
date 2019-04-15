@@ -16,6 +16,7 @@ import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.ReportPlugin;
 import org.apache.maven.model.ReportSet;
 import org.apache.maven.model.Reporting;
+import org.apache.maven.model.Scm;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -303,6 +304,16 @@ class CodeQualityHelper {
     msp.setVersion(mspVersion);
     LOGGER.info("Done re-configuring " + MAVEN_SITE_PLUGIN + ".");
     return p;
+  }
+
+
+  void addScmInfo(MavenProject pProject, String pUrl) {
+    Scm scm = new Scm();
+    pProject.setScm(scm);
+
+    scm.setConnection(pUrl);
+    scm.setDeveloperConnection(pUrl);
+    scm.setUrl(pUrl);
   }
 
 
