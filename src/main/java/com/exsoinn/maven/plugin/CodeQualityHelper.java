@@ -271,6 +271,25 @@ class CodeQualityHelper {
     return autoConfigureMavenSitePlugin(project);
   }
 
+  Plugin createSiteUploadPlugin() {
+    final String pluginName = "site-maven-plugin";
+    Plugin p = createMavenPlugin("com.github.github", pluginName, "0.9");
+    //pProject.getModel().getBuild().getPluginsAsMap().put("com.github.github:" + pluginName, p);
+
+    PluginExecution pe = new PluginExecution();
+    pe.addGoal("site");
+    pe.setPhase("site-deploy");
+    List<PluginExecution> peList = new ArrayList<>();
+    peList.add(pe);
+    p.setExecutions(peList);
+    Xpp3Dom conf = MojoExecutor.configuration();
+    p.setConfiguration(conf);
+    addSimpleTag("server", "github", conf);
+    addSimpleTag("merge", "false", conf);
+    return p;
+  }
+
+
   /**
    * Auto-configures the {@link CodeQualityHelper#MAVEN_SITE_PLUGIN} to suit our needs, creating it
    * first if not already present, else dependencies are cleared and added from scratch. Why are we
