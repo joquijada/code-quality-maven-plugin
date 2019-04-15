@@ -1,7 +1,5 @@
 package com.exsoinn.maven.plugin;
 
-import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -90,23 +88,13 @@ class CodeQualityHelper {
 
   @Component
   private BuildPluginManager pluginManager;
-
-
-  DistributionManagement buildDistributionManagement(MavenProject pProj) {
-    DistributionManagement dm = new DistributionManagement();
-    pProj.setDistributionManagement(dm);
-    return null;
-  }
-
+  
 
   Plugin createJacocoMavenPlugin() {
     return createMavenPlugin("org.jacoco", "jacoco-maven-plugin", "0.7.9");
   }
 
 
-  Plugin createJacocoReportMavenPlugin() {
-    return createMavenPlugin("org.jacoco", "jacoco-maven-plugin", "0.7.9");
-  }
 
 
   private Plugin createMavenPlugin(String pGroupId, String pArtifactId, String pVersion) {
@@ -249,9 +237,7 @@ class CodeQualityHelper {
     return jacocoConfig;
   }
 
-  boolean pluginExists(String pKey) {
-    return project.getModel().getBuild().getPluginsAsMap().containsKey(pKey);
-  }
+
 
 
   private void addDependency(String pGroupId, String pArtifactId, String pVersion,
@@ -273,8 +259,8 @@ class CodeQualityHelper {
 
   Plugin createSiteUploadPlugin() {
     final String pluginName = "site-maven-plugin";
+    LOGGER.info("Creating {} plugin...", pluginName);
     Plugin p = createMavenPlugin("com.github.github", pluginName, "0.9");
-    //pProject.getModel().getBuild().getPluginsAsMap().put("com.github.github:" + pluginName, p);
 
     PluginExecution pe = new PluginExecution();
     pe.addGoal("site");
@@ -286,6 +272,7 @@ class CodeQualityHelper {
     p.setConfiguration(conf);
     addSimpleTag("server", "github", conf);
     addSimpleTag("merge", "false", conf);
+    LOGGER.info("Done creating {} plugin.", pluginName);
     return p;
   }
 
