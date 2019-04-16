@@ -2,15 +2,14 @@
 > This project is a Maven extension plugin that can be used in you project to incorporate, declaratively (I.e. via Maven plugin configurations) other plugins that assist in ascertaining the quality of the code associated with that project.
 
 <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
-
-      - [Introduction](#introduction)   
-      - [How It Works](#how-it-works)   
-      - [Configuration](#configuration)   
-         - [scmUrl](#scmurl)   
-         - [siteUpload](#siteupload)   
-         - [sitePath](#sitepath)   
-         - [siteMerge](#sitemerge)   
-         - [packageNames](#packagenames)   
+- [Introduction](#introduction)   
+- [How It Works](#how-it-works)   
+- [Configuration](#configuration)   
+   - [scmUrl](#scmurl)   
+   - [siteUpload](#siteupload)   
+   - [sitePath](#sitepath)   
+   - [siteMerge](#sitemerge)   
+   - [packageNames](#packagenames)   
 
 <!-- /MDTOC -->
 
