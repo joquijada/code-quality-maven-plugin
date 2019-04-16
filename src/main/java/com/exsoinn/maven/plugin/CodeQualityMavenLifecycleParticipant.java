@@ -60,7 +60,7 @@ public class CodeQualityMavenLifecycleParticipant extends AbstractMavenLifecycle
      * set up the plugin for that
      */
     String projUrl = pSession.getCurrentProject().getModel().getUrl();
-    Boolean uploadSite = Boolean.valueOf(readParameter(pSession.getCurrentProject(), "uploadSite"));
+    Boolean uploadSite = Boolean.valueOf(readParameter(pSession.getCurrentProject(), "siteUpload"));
 
     if (uploadSite && StringUtils.isNotBlank(projUrl) && projUrl.contains("github.com")) {
       String sitePath = readParameter(pSession.getCurrentProject(), "sitePath");
