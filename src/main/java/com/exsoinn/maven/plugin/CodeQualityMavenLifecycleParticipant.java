@@ -1,5 +1,6 @@
 package com.exsoinn.maven.plugin;
 
+import java.util.Arrays;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.MavenExecutionException;
 import org.apache.maven.execution.MavenSession;
@@ -31,8 +32,14 @@ public class CodeQualityMavenLifecycleParticipant extends AbstractMavenLifecycle
     codeQualityHelper.LOGGER.info("Project read, Dynamically reconfiguring the Maven model..."
             + pSession.getCurrentProject().getModel());
     // Add Jacoco plugin
+    String pkgNamesAsStr = readParameter(pSession.getCurrentProject(), "packageNames");
+    if (StringUtils.isBlank(pkgNamesAsStr)) {
+      throw new IllegalArgumentException("Parameter 'packageNames' is required. Provide comma-separated list"
+              + " of Java package names to scan");
+    }
+
     pSession.getCurrentProject().getModel().getBuild().getPlugins()
-            .add(codeQualityHelper.createJacocoPlugin());
+            .add(codeQualityHelper.createJacocoPlugin(Arrays.asList(pkgNamesAsStr.split(","))));
     // Reconfigure Maven surefire plugin
     codeQualityHelper.reConfigureMavenSurefirePlugin(pSession.getCurrentProject());
 
@@ -54,9 +61,12 @@ public class CodeQualityMavenLifecycleParticipant extends AbstractMavenLifecycle
      */
     String projUrl = pSession.getCurrentProject().getModel().getUrl();
     Boolean uploadSite = Boolean.valueOf(readParameter(pSession.getCurrentProject(), "uploadSite"));
+
     if (uploadSite && StringUtils.isNotBlank(projUrl) && projUrl.contains("github.com")) {
+      String sitePath = readParameter(pSession.getCurrentProject(), "sitePath");
+      Boolean siteMerge = Boolean.valueOf(readParameter(pSession.getCurrentProject(), "siteMerge"));
       pSession.getCurrentProject().getModel().getBuild().getPlugins()
-              .add(codeQualityHelper.createSiteUploadPlugin());
+              .add(codeQualityHelper.createSiteUploadPlugin(sitePath, siteMerge));
     }
 
     codeQualityHelper.LOGGER.info("Done dynamically reconfiguring the Maven model, final model is: "

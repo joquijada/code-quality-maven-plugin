@@ -36,7 +36,7 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo {
    */
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
-    info("Jacoco will be run against this package: " + codeQualityHelper.getPackageName());
+    //info("Jacoco will be run against this package: " + codeQualityHelper.getPackageName());
     Plugin jacocoPlugin = codeQualityHelper.createJacocoMavenPlugin();
 
     /**
@@ -50,7 +50,7 @@ public class CodeQualityInitializeMojo extends AbstractCodeQualityMojo {
      * TODO: needs to be strongly documented in README.md.
      */
     executeMojo(jacocoPlugin, "prepare-agent",
-            codeQualityHelper.configureJacocoMavenPluginForInitialize(),
+            codeQualityHelper.configureJacocoMavenPluginForInitialize(null),
             executionEnvironment(codeQualityHelper.getProject(),
                     codeQualityHelper.getMavenSession(), codeQualityHelper.getPluginManager()));
     info("The jacoco prepare-agent goal defined the following project property: "

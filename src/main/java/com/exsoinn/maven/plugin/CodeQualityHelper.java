@@ -8,7 +8,6 @@ import java.util.Map;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
-import org.apache.maven.model.DistributionManagement;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.model.PluginExecution;
 import org.apache.maven.model.ReportPlugin;
@@ -66,12 +65,6 @@ class CodeQualityHelper {
 
   static Logger LOGGER = LoggerFactory.getLogger(CodeQualityHelper.class);
 
-  /**
-   * This is required. It gives the location of the classes against which code quality check will
-   * run.
-   */
-  @Parameter(required = true)
-  private String packageName;
 
   /**
    * The current project that Maven is building
@@ -88,13 +81,11 @@ class CodeQualityHelper {
 
   @Component
   private BuildPluginManager pluginManager;
-  
+
 
   Plugin createJacocoMavenPlugin() {
     return createMavenPlugin("org.jacoco", "jacoco-maven-plugin", "0.7.9");
   }
-
-
 
 
   private Plugin createMavenPlugin(String pGroupId, String pArtifactId, String pVersion) {
@@ -112,7 +103,7 @@ class CodeQualityHelper {
   }
 
 
-  Plugin createJacocoPlugin() {
+  Plugin createJacocoPlugin(List<String> pPkgNames) {
     final String prepAgent = "prepare-agent";
     Plugin p = createJacocoMavenPlugin();
     // 1. Add Jacoco init execution, the one that sets up the jacocoArgLine via the
@@ -121,7 +112,7 @@ class CodeQualityHelper {
     p.addExecution(execPrepareAgent);
     execPrepareAgent.setId(prepAgent);
     execPrepareAgent.setGoals(Collections.singletonList(prepAgent));
-    execPrepareAgent.setConfiguration(configureJacocoMavenPluginForInitialize());
+    execPrepareAgent.setConfiguration(configureJacocoMavenPluginForInitialize(pPkgNames));
 
     // 2. Set up Jacoco "check" goal execution
     final String check = "check";
@@ -224,20 +215,20 @@ class CodeQualityHelper {
     pTarget.addChild(tag);
   }
 
-  Xpp3Dom configureJacocoMavenPluginForInitialize() {
+  Xpp3Dom configureJacocoMavenPluginForInitialize(List<String> pPkgNames) {
     Xpp3Dom jacocoConfig = MojoExecutor.configuration();
     Xpp3Dom propNameTag = new Xpp3Dom("propertyName");
     propNameTag.setValue(JACOCO_ARG_LINE_PROP_NAME);
     jacocoConfig.addChild(propNameTag);
     Xpp3Dom includesParentNode = new Xpp3Dom("includes");
-    Xpp3Dom includesChildNode = new Xpp3Dom("include");
-    includesChildNode.setValue(packageName);
-    includesParentNode.addChild(includesChildNode);
+    for (String pkg : pPkgNames) {
+      Xpp3Dom includesChildNode = new Xpp3Dom("include");
+      includesChildNode.setValue(pkg);
+      includesParentNode.addChild(includesChildNode);
+    }
     jacocoConfig.addChild(includesParentNode);
     return jacocoConfig;
   }
-
-
 
 
   private void addDependency(String pGroupId, String pArtifactId, String pVersion,
@@ -257,21 +248,27 @@ class CodeQualityHelper {
     return autoConfigureMavenSitePlugin(project);
   }
 
-  Plugin createSiteUploadPlugin() {
+  Plugin createSiteUploadPlugin(String pSitePath, boolean pMerge) {
     final String pluginName = "site-maven-plugin";
     LOGGER.info("Creating {} plugin...", pluginName);
-    Plugin p = createMavenPlugin("com.github.github", pluginName, "0.9");
+    // Use version 0.12 and not 0.9 because of issue reported here:
+    // https://github.com/github/maven-plugins/issues/105. The official doc
+    // says to use version 0.9 (https://github.github.com/maven-plugins/site-plugin/)
+    Plugin p = createMavenPlugin("com.github.github", pluginName, "0.12");
 
     PluginExecution pe = new PluginExecution();
     pe.addGoal("site");
-    pe.setPhase("site-deploy");
+    pe.setPhase("site");
     List<PluginExecution> peList = new ArrayList<>();
     peList.add(pe);
     p.setExecutions(peList);
     Xpp3Dom conf = MojoExecutor.configuration();
-    p.setConfiguration(conf);
+    //p.setConfiguration(conf);
+    pe.setConfiguration(conf);
     addSimpleTag("server", "github", conf);
-    addSimpleTag("merge", "false", conf);
+    addSimpleTag("merge", Boolean.toString(pMerge), conf);
+    addSimpleTag("path", pSitePath, conf);
+    addSimpleTag("message", "Building site for my project", conf);
     LOGGER.info("Done creating {} plugin.", pluginName);
     return p;
   }
@@ -450,10 +447,6 @@ class CodeQualityHelper {
 
   BuildPluginManager getPluginManager() {
     return pluginManager;
-  }
-
-  String getPackageName() {
-    return packageName;
   }
 
 }
