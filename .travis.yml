@@ -7,7 +7,6 @@ language: java
 stages:
   - test
   - report
-  if: branch = master
 
 
 #addons:
@@ -35,3 +34,4 @@ jobs:
       name: Report Code Quality
       #script: mvn sonar:sonar
       script: echo "Byy, bye"
+      if: branch = master
