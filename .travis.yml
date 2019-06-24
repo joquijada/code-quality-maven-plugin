@@ -23,6 +23,7 @@ cache:
     - '$HOME/.sonar/cache'
 
 
+
 jobs:
   include:
     - mvn clean install -P coverage
