@@ -6,3 +6,4 @@ target
 *.iml
 .idea
 .npmignore
+*.swp
