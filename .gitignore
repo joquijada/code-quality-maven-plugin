@@ -5,5 +5,4 @@ target
 .project
 *.iml
 .idea
-.travis.yml
 .npmignore

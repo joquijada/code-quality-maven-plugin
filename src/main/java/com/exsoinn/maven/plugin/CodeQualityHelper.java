@@ -253,12 +253,21 @@ class CodeQualityHelper {
     LOGGER.info("Creating {} plugin...", pluginName);
     // Use version 0.12 and not 0.9 because of issue reported here:
     // https://github.com/github/maven-plugins/issues/105. The official doc
-    // says to use version 0.9 (https://github.github.com/maven-plugins/site-plugin/)
+    // says to use version 0.9 (https://github.github.com/maven-plugins/site-plugin/) though.
     Plugin p = createMavenPlugin("com.github.github", pluginName, "0.12");
 
     PluginExecution pe = new PluginExecution();
     pe.addGoal("site");
-    pe.setPhase("site");
+    /*
+     * I had initial confusion because the doc example binds it to site-deploy, yet
+     * if you don't execute site-deploy, then the plugin will not execute. Initially I was calling
+     * `pe.setPhase("site-deploy")` below, and because I was running `mvn site`,
+     * hence the reason why this plugin was not executing. Then I read
+     * the documentation here to understand better how site generation should behave
+     * See Maven site plugin doc at
+     * https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#Lifecycle_Reference
+     */
+    pe.setPhase("site-deploy");
     List<PluginExecution> peList = new ArrayList<>();
     peList.add(pe);
     p.setExecutions(peList);
