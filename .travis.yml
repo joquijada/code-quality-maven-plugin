@@ -10,7 +10,7 @@ addons:
 
 
 script:
-  - mvn clean install
+  - mvn clean install -P coverage
 
 
 cache:
@@ -19,8 +19,8 @@ cache:
     - '$HOME/.sonar/cache'
 
 
-jobs:
-  include:
-    - stage: report
-      name: Report Code Quality
-      script: mvn sonar:sonar
+#jobs:
+#  include:
+#    - stage: report
+#      name: Report Code Quality
+#      script: mvn sonar:sonar
