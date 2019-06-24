@@ -28,6 +28,6 @@ jobs:
   include:
     #- mvn clean install -P coverage
     - stage: report
-      if: branch = master
+      #if: branch = master
       name: Report Code Quality
       script: mvn sonar:sonar
