@@ -4,9 +4,9 @@
 # https://docs.travis-ci.com/user/sonarcloud/ 
 language: java
 
-stages:
-  - test
-  - report
+#stages:
+#  - test
+#  - report
 
 addons:
   sonarcloud:
@@ -25,6 +25,7 @@ cache:
 
 jobs:
   include:
+    - mvn clean install -P coverage
     - stage: report
       name: Report Code Quality
       script: mvn sonar:sonar
