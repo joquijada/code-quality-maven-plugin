@@ -7,14 +7,16 @@ language: java
 stages:
   - test
   - report
+  if: branch = master
+
 
 addons:
   sonarcloud:
     organization: "joquijada-github"
 
 
-script:
-  - mvn clean install -P coverage
+#script:
+#  - mvn clean install -P coverage
 
 
 cache:
@@ -26,8 +28,8 @@ cache:
 
 jobs:
   include:
-    #- mvn clean install -P coverage
+    - stage: test
+      script: mvn clean install -P coverage
     - stage: report
-      #if: branch = master
       name: Report Code Quality
       script: mvn sonar:sonar
