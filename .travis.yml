@@ -10,9 +10,9 @@ stages:
   #if: branch = master
 
 
-addons:
-  sonarcloud:
-    organization: "joquijada-github"
+#addons:
+#  sonarcloud:
+#    organization: "joquijada-github"
 
 
 script:
@@ -30,4 +30,5 @@ jobs:
   include:
     - stage: report
       name: Report Code Quality
-      script: mvn sonar:sonar
+      #script: mvn sonar:sonar
+      script: echo "Byy, bye"
