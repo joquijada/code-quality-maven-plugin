@@ -9,9 +9,9 @@ stages:
   - report
 
 
-#addons:
-#  sonarcloud:
-#    organization: "joquijada-github"
+addons:
+  sonarcloud:
+    organization: "joquijada-github"
 
 
 script:
@@ -27,11 +27,10 @@ cache:
 
 jobs:
   include:
-    - stage: test
-      name: Test the Code
-      script: mvn clean install -P coverage
+    #- stage: test
+    #  name: Test the Code
+    #  script: mvn clean install -P coverage
     - stage: report
       name: Report Code Quality
-      #script: mvn sonar:sonar
-      script: echo "Byy, bye"
+      script: mvn sonar:sonar
       if: branch = master
