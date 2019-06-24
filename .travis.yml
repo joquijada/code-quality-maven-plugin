@@ -28,6 +28,9 @@ cache:
 
 jobs:
   include:
+    - stage: test
+      name: Test the Code
+      script: mvn clean install -P coverage
     - stage: report
       name: Report Code Quality
       #script: mvn sonar:sonar
