@@ -10,7 +10,7 @@ addons:
 
 
 script:
-  - mvn clean install -Pcoverage
+  - mvn clean install
 
 
 cache:
