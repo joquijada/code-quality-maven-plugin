@@ -10,10 +10,17 @@ addons:
 
 
 script:
-  - mvn clean verify sonar:sonar -Pcoverage
+  - mvn clean install -Pcoverage
 
 
 cache:
   directories:
     - '$HOME/.m2/repository'
     - '$HOME/.sonar/cache'
+
+
+jobs:
+  include:
+    - stage: report
+      name: Report Code Quality
+      script: mvn sonar:sonar
