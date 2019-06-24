@@ -14,8 +14,8 @@ addons:
     organization: "joquijada-github"
 
 
-#script:
-#  - mvn clean install -P coverage
+script:
+  - mvn clean install -P coverage
 
 
 cache:
@@ -25,12 +25,15 @@ cache:
 
 
 
+# Need to define the `test` stage here, else nothing runs in Travis CI
+# Maybe my understanding of things is wrong, but I thought the `test`
+# stage is the default and always runs.
 jobs:
   include:
-    - stage: test
-      name: Test the Code
-      script: mvn clean install -P coverage
+      #- stage: test
+      #name: Test the Code
+      #script: mvn clean install -P coverage
     - stage: report
       name: Report Code Quality
       script: mvn sonar:sonar
-      if: branch = master
+      #if: branch = master
