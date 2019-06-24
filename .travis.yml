@@ -13,8 +13,8 @@ addons:
     organization: "joquijada-github"
 
 
-script:
-  - mvn clean install -P coverage
+#script:
+#  - mvn clean install -P coverage
 
 
 cache:
