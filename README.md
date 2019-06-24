@@ -13,6 +13,7 @@
 
 <!-- /MDTOC -->
 
+[![Build Status](https://travis-ci.com/joquijada/code-quality-maven-plugin.svg?branch=master)](https://travis-ci.com/joquijada/code-quality-maven-plugin)
 
 ### Introduction
 Inspiration for this project came from the [Maven Code Quality Pom](https://github.com/gregswindle/maven-code-quality-pom).
