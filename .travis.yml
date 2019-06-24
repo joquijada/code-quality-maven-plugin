@@ -4,9 +4,9 @@
 # https://docs.travis-ci.com/user/sonarcloud/ 
 language: java
 
-#stages:
-#  - test
-#  - report
+stages:
+  - test
+  - report
 
 
 addons:
@@ -14,8 +14,8 @@ addons:
     organization: "joquijada-github"
 
 
-script:
-  - mvn clean install -P coverage
+#script:
+#  - mvn clean install -P coverage
 
 
 cache:
@@ -27,9 +27,9 @@ cache:
 
 jobs:
   include:
-    #- stage: test
-    #  name: Test the Code
-    #  script: mvn clean install -P coverage
+    - stage: test
+      name: Test the Code
+      script: mvn clean install -P coverage
     - stage: report
       name: Report Code Quality
       script: mvn sonar:sonar
