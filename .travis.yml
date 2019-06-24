@@ -4,9 +4,9 @@
 # https://docs.travis-ci.com/user/sonarcloud/ 
 language: java
 
-#stages:
-#  - test
-#  - report
+stages:
+  - test
+  - report
   #if: branch = master
 
 
