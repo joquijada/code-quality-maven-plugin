@@ -6,6 +6,6 @@ import org.junit.Test;
 public class CodeQualityTest {
 
   @Test
-  public void name() {
+  public void test1() {
   }
 }
