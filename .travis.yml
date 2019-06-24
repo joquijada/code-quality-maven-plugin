@@ -4,6 +4,10 @@
 # https://docs.travis-ci.com/user/sonarcloud/ 
 language: java
 
+stages:
+  - test
+  - report
+
 addons:
   sonarcloud:
     organization: "joquijada-github"
@@ -19,8 +23,8 @@ cache:
     - '$HOME/.sonar/cache'
 
 
-#jobs:
-#  include:
-#    - stage: report
-#      name: Report Code Quality
-#      script: mvn sonar:sonar
+jobs:
+  include:
+    - stage: report
+      name: Report Code Quality
+      script: mvn sonar:sonar
