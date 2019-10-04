@@ -2,6 +2,8 @@
 > This project is a Maven extension plugin that can be used in you project to incorporate, declaratively (I.e. via Maven plugin configurations) other plugins that assist in ascertaining the quality of the code associated with that project.
 
 [![Build Status](https://travis-ci.com/joquijada/code-quality-maven-plugin.svg?branch=master)](https://travis-ci.com/joquijada/code-quality-maven-plugin)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exsoinn%3Acode-quality-maven-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.exsoinn%3Acode-quality-maven-plugin)
+
 
 
 <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
