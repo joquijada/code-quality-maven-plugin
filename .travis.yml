@@ -23,8 +23,8 @@ cache:
 
 # Need to define the `test` stage here, else nothing runs in Travis CI.
 # Maybe my understanding of things is wrong, but I thought the `test`
-# stage is the default and always runs, hence to need to explicitly define 
-# anywhere, oh well at least I got it to work.
+# stage is the default and always runs, hence no need to explicitly define 
+# anywhere. Oh well at least I got it to work.
 jobs:
   include:
     - stage: test
