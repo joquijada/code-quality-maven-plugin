@@ -1,15 +1,16 @@
-after_success:
-  - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --skip-maven-deploy
-  
-before_install: |
-  # only install signing keys under the same circumstances we do a mvn deploy later
-  if [[ "$TRAVIS_PULL_REQUEST" = false ]] && [[ "$TRAVIS_BRANCH" = master ]]; then
-    openssl aes-256-cbc -K $encrypted_319571283a54_key -iv $encrypted_319571283a54_iv -in maven-artifact-signing-key.asc.enc -out maven-artifact-signing-key.asc -d
-    gpg --import --batch maven-artifact-signing-key.asc
-  fi
+#after_success:
+#  - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --skip-maven-deploy
 
-before_script:
-  - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05 semantic-release@15
+  
+#before_install: |
+#  # only install signing keys under the same circumstances we do a mvn deploy later
+#  if [[ "$TRAVIS_PULL_REQUEST" = false ]] && [[ "$TRAVIS_BRANCH" = master ]]; then
+#    openssl aes-256-cbc -K $encrypted_319571283a54_key -iv $encrypted_319571283a54_iv -in maven-artifact-signing-key.asc.enc -out maven-artifact-signing-key.asc -d
+#    gpg --import --batch maven-artifact-signing-key.asc
+#  fi
+
+#before_script:
+#  - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05 semantic-release@15
 
 
 
@@ -42,6 +43,7 @@ matrix:
 stages:
   - test
   - report
+  - deploy
 
 
 addons:
@@ -60,8 +62,20 @@ jobs:
       # This stage runs for all branches
       name: Test the Code
       script: mvn clean install -P coverage
+      if: type IN (push, pull_request)
     - stage: report
       # Report only on the master branch
       name: Report Code Quality
       script: mvn sonar:sonar
       if: branch = master
+    - stage: deploy
+      # This stage runs for all branches
+      name: Deploy to Maven Repo
+      script:
+        - cd/before-deploy.sh
+        - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05 semantic-release@15
+        # If we're deploying, it means all tests passed prior to pull request getting landed, hence skip running tests again
+        - mvn package -Dmaven.test.skip=true
+        - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --skip-maven-deploy
+      if: branch = master
+
