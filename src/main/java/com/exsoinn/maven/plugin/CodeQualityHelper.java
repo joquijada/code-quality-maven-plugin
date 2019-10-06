@@ -28,6 +28,10 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
  */
 class CodeQualityHelper {
 
+  static final String PLUGIN_GROUP = "com.exsoinn";
+  static final String PLUGIN_ARTIFACTID = "code-quality-maven-plugin";
+  static final String PLUGIN_KEY = PLUGIN_GROUP + ":" + PLUGIN_ARTIFACTID;
+
   private static final List<String> reports;
 
   private static final String KEY_COUNTER = "counter";
@@ -260,12 +264,14 @@ class CodeQualityHelper {
     pe.addGoal("site");
     /*
      * I had initial confusion because the doc example binds it to site-deploy, yet
-     * if you don't execute site-deploy, then the plugin will not execute. Initially I was calling
-     * `pe.setPhase("site-deploy")` below, and because I was running `mvn site`,
-     * hence the reason why this plugin was not executing. Then I read
+     * if you don't execute site-deploy, then the plugin will not execute. Notice below is binding to
+     * `site-maven-plugin` to `site-deploy`. If you run `mvn site`, then this plugin will
+     * not execute. I read
      * the documentation here to understand better how site generation should behave
      * See Maven site plugin doc at
-     * https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#Lifecycle_Reference
+     * https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#Lifecycle_Reference, search
+     * for "execute processes needed prior to the actual project site generation" see the phases associated with the
+     * Maven Site lifecycle
      */
     pe.setPhase("site-deploy");
     List<PluginExecution> peList = new ArrayList<>();
@@ -369,7 +375,7 @@ class CodeQualityHelper {
     pReportingNode
             .addPlugin(createMavenReportPlugin("org.codehaus.mojo", "jdepend-maven-plugin", "2.0"));
     pReportingNode
-            .addPlugin(createMavenReportPlugin("org.owasp", "dependency-check-maven", "3.0.2"));
+            .addPlugin(createMavenReportPlugin("org.owasp", "dependency-check-maven", "5.2.2"));
     pReportingNode.addPlugin(createMavenReportPlugin("org.apache.maven.plugins",
             "maven-dependency-plugin", "2.10"));
     pReportingNode.addPlugin(createMavenReportPlugin("org.apache.maven.plugins",
@@ -443,6 +449,12 @@ class CodeQualityHelper {
   }
 
 
+  String readParameter(MavenProject pProject, String pName) {
+    Plugin plugin = pProject.getBuild().getPluginsAsMap().get(PLUGIN_KEY);
+    Xpp3Dom config = (Xpp3Dom) plugin.getConfiguration();
+    Xpp3Dom child = config.getChild(pName);
+    return null != child ? child.getValue() : null;
+  }
   /*
    * Getters
    */

@@ -1,8 +1,43 @@
+after_success:
+  - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --skip-maven-deploy
+  
+before_install: |
+  # only install signing keys under the same circumstances we do a mvn deploy later
+  if [[ "$TRAVIS_PULL_REQUEST" = false ]] && [[ "$TRAVIS_BRANCH" = master ]]; then
+    openssl aes-256-cbc -K $encrypted_319571283a54_key -iv $encrypted_319571283a54_iv -in maven-artifact-signing-key.asc.enc -out maven-artifact-signing-key.asc -d
+    gpg --import --batch maven-artifact-signing-key.asc
+  fi
+
+before_script:
+  - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05 semantic-release@15
+
+
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.yarn-cache'
+    - '$HOME/.sonar/cache'
+  
 # See https://github.com/SonarSource/sq-com_example_java-maven-travis/blob/master/.travis.yml,
 # a lot of what you see here borrowed from there. I got that URL from
 # this page:
-# https://docs.travis-ci.com/user/sonarcloud/ 
+# https://docs.travis-ci.com/user/sonarcloud/
 language: java
+
+jdk:
+  - openjdk8
+  - openjdk9
+  - openjdk10
+  - openjdk11
+  - openjdk12
+  - openjdk13
+
+matrix:
+  allow_failures:
+    jdk:
+      - openjdk12
+      - openjdk13
 
 stages:
   - test
@@ -12,12 +47,6 @@ stages:
 addons:
   sonarcloud:
     organization: "joquijada-github"
-
-
-cache:
-  directories:
-    - '$HOME/.m2/repository'
-    - '$HOME/.sonar/cache'
 
 
 
