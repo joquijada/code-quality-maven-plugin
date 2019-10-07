@@ -28,6 +28,8 @@ cache:
 # https://docs.travis-ci.com/user/sonarcloud/
 language: java
 
+install: true
+
 jdk:
   - openjdk8
   - openjdk9
