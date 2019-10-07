@@ -65,7 +65,7 @@ jobs:
     - stage: test
       # This stage runs for all branches
       name: Test the Code
-      script: mvn clean package -P coverage
+      script: mvn clean package -P coverage sonar:sonar
       if: type IN (push, pull_request)
     #- stage: report
     #  # Report only on the master branch
