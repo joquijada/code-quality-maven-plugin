@@ -1,0 +1,9 @@
+.classpath
+classes
+.settings
+target
+.project
+*.iml
+.idea
+.npmignore
+*.swp
