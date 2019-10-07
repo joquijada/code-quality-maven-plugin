@@ -46,7 +46,7 @@ matrix:
 
 stages:
   - test
-  - report
+  #- report
   - deploy
 
 
@@ -67,11 +67,11 @@ jobs:
       name: Test the Code
       script: mvn clean package -P coverage
       if: type IN (push, pull_request)
-    - stage: report
-      # Report only on the master branch
-      name: Report Code Quality
-      script: mvn sonar:sonar
-      if: branch = master
+    #- stage: report
+    #  # Report only on the master branch
+    #  name: Report Code Quality
+    #  script: mvn sonar:sonar
+    #  if: branch = master
     - stage: deploy
       # This stage runs for all branches
       name: Deploy to Maven Repo
