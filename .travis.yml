@@ -1,85 +1,52 @@
-#after_success:
-#  - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --skip-maven-deploy
-
-  
 before_install:
-  - chmod 777 cd/before-deploy.sh
-  - cd/before-deploy.sh
-#  # only install signing keys under the same circumstances we do a mvn deploy later
-#  if [[ "$TRAVIS_PULL_REQUEST" = false ]] && [[ "$TRAVIS_BRANCH" = master ]]; then
-#    openssl aes-256-cbc -K $encrypted_319571283a54_key -iv $encrypted_319571283a54_iv -in maven-artifact-signing-key.asc.enc -out maven-artifact-signing-key.asc -d
-#    gpg --import --batch maven-artifact-signing-key.asc
-#  fi
-
-#before_script:
-#  - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05 semantic-release@15
-
-
-
+- chmod 777 cd/before-deploy.sh
+- cd/before-deploy.sh
 cache:
   directories:
-    - '$HOME/.m2/repository'
-    - '$HOME/.yarn-cache'
-    - '$HOME/.sonar/cache'
-  
-# See https://github.com/SonarSource/sq-com_example_java-maven-travis/blob/master/.travis.yml,
-# a lot of what you see here borrowed from there. I got that URL from
-# this page:
-# https://docs.travis-ci.com/user/sonarcloud/
+  - "$HOME/.m2/repository"
+  - "$HOME/.yarn-cache"
+  - "$HOME/.sonar/cache"
 language: java
-
 install: true
-
 jdk:
-  - openjdk8
-  - openjdk9
-  - openjdk10
-  - openjdk11
-  - openjdk12
-  - openjdk13
-
+- openjdk8
+- openjdk9
+- openjdk10
+- openjdk11
+- openjdk12
+- openjdk13
 matrix:
   allow_failures:
     jdk:
-      - openjdk12
-      - openjdk13
-
+    - openjdk12
+    - openjdk13
 stages:
-  - test
-  #- report
-  - deploy
-
-
+- test
+- deploy
 addons:
   sonarcloud:
-    organization: "joquijada-github"
-
-
-
-# Need to define the `test` stage here, else nothing runs in Travis CI.
-# Maybe my understanding of things is wrong, but I thought the `test`
-# stage is the default and always runs, hence no need to explicitly define 
-# anywhere. Oh well at least I got it to work.
+    organization: joquijada-github
 jobs:
   include:
-    - stage: test
-      # This stage runs for all branches
-      name: Test the Code
-      script: mvn clean package -P coverage sonar:sonar
-      if: type IN (push, pull_request)
-    #- stage: report
-    #  # Report only on the master branch
-    #  name: Report Code Quality
-    #  script: mvn sonar:sonar
-    #  if: branch = master
-    - stage: deploy
-      # This stage runs for all branches
-      name: Deploy to Maven Repo
-      script:
-        #- cd/before-deploy.sh
-        - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05 semantic-release@15
-        # If we're deploying, it means all tests passed prior to pull request getting landed, hence skip running tests again
-        - mvn package -Dmaven.test.skip=true
-        - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --skip-maven-deploy
-      if: branch = master
-
+  - stage: test
+    name: Test the Code
+    script: mvn clean package -P coverage sonar:sonar
+    if: type IN (push, pull_request)
+  - stage: deploy
+    name: Deploy to Maven Repo
+    script:
+    - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05
+      semantic-release@15
+    - mvn package -Dmaven.test.skip=true
+    - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release
+      --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release
+      --verify-release @conveyal/maven-semantic-release
+    if: branch = master
+sudo: false
+env:
+  global:
+  - secure: YA5r8QTTmf/0ft5+mtI7uJU0y6cTnCGLGSp+E4JLLSBNOjjY/j3aGHyhtOrZ9+h34EputnZvaMV04iLWzvuyqpXy7Z2FMRHTaRiSdYHeZcJOZbBRW8F3BnUp1cSeTI14/2KsxIQJ21W+kT1l2inRmPQd1cFL5REwNP1gSGjtNwvn9rhe36iN9CfThCjAbSEqdwWevAeg+7lMQQ+FBZ7TKatvegVit8a1ipwf7uMPYKZOb9SQW00Ap3LyPw3O2glQcPt48n0MC50SY7nA3xbCMf+Q7VOfgDWbnNb1Fcijt9qBtPCmZHGBWhEfP/Pd9U11bfa4A7FAWn80RFOO15KADGROyN4oA/Yh4FcLevb9H9HsXxYGkFcB2gA95HrIljr5trDU4qoj/pcc+OOyhskO3UYVL3CY1ZYMjwP9oDfaJNmCsI2VUCEPTnQeCXmBqJ1ju5wl5ZrOOKpC2sEhnQbk/rRha9xGjPbG5B1+UAaDVVcJVHBKko/x1JWVXnzHO/ITHJpf3M5eIJH6ilpeMlhNNyzxBEp3mhhjGWbcdx8VEN1ddCsHZ2bU77kP+LH1oQl0aVM6LIB01iQTExnhsA37Gf5NwF8u9LNVX6AjcEquV7c+wAaYjj8ebhqz/6kfa3WY7yKNEReKGEH+x9rPILaGIsjWUeEbc4YYN0hReMpV7lQ=
+  - secure: WKFDccmpyY+s4bJ6p1jgy0b506t+Q48W+5IoYtcwXpr4wmKG+WG2T77tnuLcTj5w7XIlEuuMy1WLO7Y7EcXufYfooOrnziB7oVMk6wmxWddLgMA5x16d+4QTeWhBDzO25DQkdtFqOey5Aqk2XQqO2pmA52sqUB0XlzL4QaXpYR8moa17vf6/X7dVj13Ylbvdl6IuIolf0BQTENJrnQ4OxX4YecaT0RKL88Ql4xIY3A7hQDqhg6Dm5EF13KTSLxUIAHgkD5bVXR10k0h4ZO16CyGeZlOVqtQXnz6Mq2VAYKVp+SXO8+yMauY4u0ddVXky18tx7B0j4U66F8hbzqJ+Tap/adgC4kLuwNUMDmsv02HHio8+cWAgBqebVdZuzvSTMqe6TnUCERFSbdbcjW99an1phwKV6jNiMro9WrJdpX1M43+CzDhInv7c178ME1oXLb/ZxquPXD6pyLwtMRQG+TpvYcMq5Ma+vuRXLZBh2XAY7vMCPUzBTYuVly9wVY7fbTAdc4uv2gYKsH2Jjqe0Mbe5pSpUURW9x8dOBQItjH+4Y/y86QyAeou3EsaE//lraXC6FjXXNm4nXJFxlwRijQEtJ/MNzeGezZV6QPyEWSvbbn/iSX66AcHlUr3p3Zumeryf60MaUkAt7VoYy/IeTbm0NhiHyNGp+wfu0CMpXB8=
+  - secure: CmHXS6mFuXojMxYEBOXeYl8XIbA8O70AhXsHvzhF8/qLEQACtQw+qnq2ikc0BjT+zUFyDlURK9a2uEIpdf8+c3HThF5u9vL+2WO8fxPAPPap2XyZwcT9EGA+V2TS14CGYcQxevTf+v18ThwjCwB2hkrt+fv8BYQ+DBJyElpo13dwU0ehB91CjkjPZ/rb3y5kz+PmW+b35HQTh2U1vELVlP3QDg1PirZHoQxZnZLVrhi0j9WWBqv7lqsNTZwa64ZmXGPiMRWMPHQup6BaX82Zo5SBiC7/kwzzJgNvTOCna09DnrxzVWKLX+DUONbY9TzuXJ7Al34V+rpYoeuCxwG6/9PFjpUoVj7gto+zmiVfN4Oc7mnr0gUpPgaUoYjg0GyZwlhzXgtBQcsQiL3TXiVWJ53cxvhqhMuJtdQBMEXylLHis0jGuvZsbz9edcIcqoSoLXaKFHmwVmOTn5zKBuhV5wfSR2Ez9KrgQM3QtqDWpEz1hZVD+BqqXqX0/DlFeIuIcdRZxvKnVv5Jze0tz0gARC1+E6hl1UAYffJkZj/uhKi2/YWkInzebmUJkDkjp6hSU7XqFJZfJqy7UzAevxAFO6az+j9CVmPic4feGoP8FC1psIt2p3zaiTntf5nPVEtDOh1pGklAAhCMyE6RGpclP+R3gvmFe72QPWObxpdhL2g=
+  - secure: I4Fx0sE2QZeu3h8/MkzcH2AueShPHtE9PUlkoLP3qrkEPjdZnUL4gSK2uRk4cJSke8mCYUvnKWXN79d3BsfI1SptESOY4bjl8sIrvghhvgJ74Uc9iOf0Uy8oNSPtuZG6ZFeAtHCTnhl0T3D8jL7h5IXY+pV6bvWD2DN1x0yb7edXP/Rv0Vj1qDtOeUykqW0Q74+cJgkwVWydWMay1shT7mRHpKjHfZ8LJLcgBSoksNd5UWMdjn14id1qPkKE9jC9JxOzOgeI1INcJM4LnfujoOlvdgzL37VELx/CieGpwYmO+WAEjyy+LVQYfG7Zh4pIyUxfTl3oldKJrIMs9kPDrSIf4mDGrM8B9igwoC5HSqBOgOPHu3g67xffiE59YsH72iYtNfJ6bv1QbtTyP5p3gv4vuecBXTFco7J5soQUT3furVut2LbNj2bfXf3QZu4yo38KtiecEkpVVC06vvJxR6IfPvIWRUAQUZ74lhpic4fUyh2DdrGGfo5/4UVhcDpcxer+hoYGA2uQ//lP/qGc9rluRx14Po61V+MugerZxfJ425zA/JfKXF5pxrV0x0CPaaaV2c1TyxRSegVfh9vYSkC1nRqNrL6n3ANHLC0ej1mEjB02uulFrUJ+kMvct55g+DDwOQzenrh2DYeWRt0vIM9btPHwub+B04A/FvaRS8s=
+  - secure: IKGMfpILD7mpHjmdk+NoQl0/Gk+G8kyEt2BO3ypGq4QqzO0/nuh9zLsensxfO0GSp0fa1M/rcOvRg+lEDfNLjJYtOeoo9OhFzCsmevjajGhmgJSEUW1hLF6WRFQ24s3c3IGP/cMKuq+kJgRU+tR6JhCxG6LidDswQpon0H8Jr6sP+iyUfyIqS6IwQ+iaUnzMCG6PqpP57QWDZlXiiy7wIVH89PAA2m7DVn71ZBPDcYr4HXtXgOPHn2ffdH8CDsS8gZKtUxV94LZAm72Bu20aAuP1tUmxqnz2PQB96eyi9TIvWenb2QKLAeYAEOejb6o13XzV8/9kYHksv+q6mioKlOKZnIIeAryRfwS10Ef81BWShofEk9xBs6T6aUqgHdRiDQdym7il6sw885AqtL/gWQF3H7XFIpOg+gyAo2IEEceCQAx2ka8/trLNdUsvvpTe+qfB85f0s+m0tnwsQG4I2G1pAX+GstdisWqp/p8veOJaSQdKbH2sWz/uYRtMWDBm+SAbYvmuAMS6kD85aoKOxSPq0lSSIc0zbWhgCL5eg67W3WB6N7EItUPWo0EFyQbfiMWvXcvlan4EG4A4aoyI0TmU+OdBkw69ZQbFC4AmfrDXQz2McntQhGF+1VRsXtwsUNaCztGCE0QNict8srVTA26gIo11YydFYgTJRjUTZgc=
