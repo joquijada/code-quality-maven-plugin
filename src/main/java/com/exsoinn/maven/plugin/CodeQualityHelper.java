@@ -88,7 +88,7 @@ class CodeQualityHelper {
 
 
   Plugin createJacocoMavenPlugin() {
-    return createMavenPlugin("org.jacoco", "jacoco-maven-plugin", "0.7.9");
+    return createMavenPlugin("org.jacoco", "jacoco-maven-plugin", "0.8.4");
   }
 
 
@@ -121,17 +121,27 @@ class CodeQualityHelper {
     // 2. Set up Jacoco "check" goal execution
     final String check = "check";
     PluginExecution execCheck = new PluginExecution();
-    execCheck.setId(check);
-    execPrepareAgent.setGoals(Collections.singletonList(check));
     p.addExecution(execCheck);
+    execCheck.setId(check);
+    execCheck.setGoals(Collections.singletonList(check));
     execCheck.setConfiguration(configureJacocoMavenPluginForVerify());
 
     // 3. Add Jacoco's report execution
     final String report = "report";
     PluginExecution execReport = new PluginExecution();
+    p.addExecution(execReport);
     execReport.setId(report);
-    execCheck.setPhase("test");
-    execPrepareAgent.setGoals(Collections.singletonList(report));
+    /*
+     * Bind "report" goal of Jacoco to the "test" phase. By default this is bound to "verify", but during
+     * "verify" the rules configured with the "check" goal, which is als bound to "verify" goal, might fail
+     * the build and we won't have the test reports necessary to drill down into which classes
+     * coverage is deficient. See https://github.com/jacoco/jacoco/blob/master/jacoco-maven-plugin/src/org/jacoco/maven/CheckMojo.java
+     * and https://github.com/jacoco/jacoco/blob/master/jacoco-maven-plugin/src/org/jacoco/maven/ReportMojo.java,
+     * search or "defaultPhase" and you'll notice "check" and "report" goals respectively are
+     * bound to "verify" phase.
+     */
+    execReport.setPhase("test");
+    execReport.setGoals(Collections.singletonList(report));
     return p;
   }
 
@@ -338,8 +348,7 @@ class CodeQualityHelper {
   /**
    * Dynamically add reporting plugins. We do this reasonably early enough so that they're present
    * during "mvn site" life-cycle later on. The assumption is that this Mojo will be invoked in a
-   * phase earlier then the site phase, otherwise all bets are off. TODO: For quick test purposes do
-   * here, might need to move to its own class.
+   * phase earlier then the site phase, otherwise all bets are off.
    */
   void addReportingPlugins(Reporting pReportingNode) {
     LOGGER.info("Adding plugins to reporting section...");
@@ -445,7 +454,7 @@ class CodeQualityHelper {
     List<PluginExecution> peList = new ArrayList<>();
     peList.add(pe);
     p.setExecutions(peList);
-    LOGGER.info("Done re-configuring " + MAVEN_SITE_PLUGIN + ".");
+    LOGGER.info("Done re-configuring " + MAVEN_SUREFIRE_PLUGIN + ".");
   }
 
 

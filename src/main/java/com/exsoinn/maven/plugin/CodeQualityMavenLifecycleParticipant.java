@@ -44,7 +44,7 @@ public class CodeQualityMavenLifecycleParticipant extends AbstractMavenLifecycle
     pSession.getCurrentProject().getModel().getBuild().getPlugins()
             .add(codeQualityHelper.createJacocoPlugin(Arrays.asList(pkgNamesAsStr.split(","))));
     // Reconfigure Maven surefire plugin
-    codeQualityHelper.reConfigureMavenSurefirePlugin(pSession.getCurrentProject());
+    //codeQualityHelper.reConfigureMavenSurefirePlugin(pSession.getCurrentProject());
 
     // Add the various reporting plugins
     codeQualityHelper.addReportingPlugins(pSession.getCurrentProject().getModel().getReporting());

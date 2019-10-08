@@ -26,7 +26,8 @@
   </developers>
   <scm>
     <connection>scm:git:https://github.com/joquijada/code-quality-maven-plugin.git</connection>
-    <developerConnection>scm:git:https://github.com/joquijada/code-quality-maven-plugin.git</developerConnection>
+    <developerConnection>scm:git:https://github.com/joquijada/code-quality-maven-plugin.git
+    </developerConnection>
     <url>https://github.com/joquijada/code-quality-maven-plugin</url>
   </scm>
   <distributionManagement>
@@ -288,6 +289,29 @@
                 <phase>prepare-package</phase>
                 <goals>
                   <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <!-- Build using command `mvn clean install -P dev`. The `dev` profile
+           disables the gpg signing dependency, so that it's nto a requirement to have gpg.exe installed
+       -->
+      <id>dev</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>none</phase>
+                <goals>
+                  <goal/>
                 </goals>
               </execution>
             </executions>

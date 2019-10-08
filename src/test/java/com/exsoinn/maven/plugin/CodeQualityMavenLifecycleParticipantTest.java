@@ -65,7 +65,7 @@ public class CodeQualityMavenLifecycleParticipantTest {
      * Ooohhh yeahh! Let the verifications begin
      */
     verify(codeQualityHelper, atLeast(1)).createJacocoPlugin(any(List.class));
-    verify(codeQualityHelper, atLeast(1)).reConfigureMavenSurefirePlugin(any(MavenProject.class));
+    //verify(codeQualityHelper, atLeast(1)).reConfigureMavenSurefirePlugin(any(MavenProject.class));
     verify(codeQualityHelper, atLeast(1)).addReportingPlugins(any(Reporting.class));
     verify(codeQualityHelper, atLeast(1)).autoConfigureMavenSitePlugin(any(MavenProject.class));
   }
