@@ -5,18 +5,21 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.exsoinn%3Acode-quality-maven-plugin&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.exsoinn%3Acode-quality-maven-plugin)
 
 
-
 <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+
 - [Introduction](#introduction)   
 - [How It Works](#how-it-works)   
+- [Install](#install)   
 - [Configuration](#configuration)   
-   - [scmUrl](#scmurl)   
-   - [siteUpload](#siteupload)   
-   - [sitePath](#sitepath)   
-   - [siteMerge](#sitemerge)   
-   - [packageNames](#packagenames)   
+  - [scmUrl](#scmurl)   
+  - [siteUpload](#siteupload)   
+  - [sitePath](#sitepath)   
+  - [siteMerge](#sitemerge)   
+  - [packageNames](#packagenames)   
 
 <!-- /MDTOC -->
+
 
 ### Introduction
 Inspiration for this project came from the [Maven Code Quality Pom](https://github.com/gregswindle/maven-code-quality-pom).
@@ -49,6 +52,22 @@ This plugin conveniently wraps all of the quality reporting modules/plugins in [
 
 ### How It Works
 We make use of [Maven extension mechanism](https://maven.apache.org/examples/maven-3-lifecycle-extensions.html). Class `org.apache.maven.AbstractMavenLifecycleParticipant` has been extended to modify the Maven project model after its been read, but before a plan has been put together and executed.
+
+### Install
+Include the following in your project's `pom.xml`:
+
+```
+<dependencies>
+  ...
+  <dependency>
+    <groupId>com.exsoinn</groupId>
+    <artifactId>code-quality-maven-plugin</artifactId>
+    <version>1.0.0</version>
+    <type>maven-plugin</type>
+  </dependency>
+  ..
+</dependencies>
+```
 
 ### Configuration
 This section describes the parameters you can specify the in `<configuration/>` section of the plugin. Unless otherwise noted, each of the parameters below themselves are `XML` tags, for example `<uploadSite>true</uploadSite>`
