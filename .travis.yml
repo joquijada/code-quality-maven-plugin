@@ -1,13 +1,29 @@
+# Get ready the signing certificates which the Maven GPG plugin uses
+# during deployed carried out by our friend Node.js semantic-release package
 before_install:
 - chmod 777 cd/before-deploy.sh
 - cd/before-deploy.sh
+
 cache:
   directories:
   - "$HOME/.m2/repository"
   - "$HOME/.yarn-cache"
   - "$HOME/.sonar/cache"
 language: java
+
+# Skip Travis' default install behavior, which namely runs `mvn install`
+# which is not what we want at this stage because it will do `mvn verify` phase and
+# execute `sign` goal since that goal is attached to `verify` phase
+# (which executes before install phase, see
+# https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.htmlhttps://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html,
+# and requires among others the GPG executable, keyname and passhrase
+# configured in 'maven-settings.xml' in order to do it's thing. These parameters
+# are not made available until the semantic-release Node.js plugin
+# executes. See https://github.com/conveyal/maven-semantic-release/blob/dev/lib/maven.jshttps://github.com/conveyal/maven-semantic-release/blob/dev/lib/maven.js
+# and search for "'deploy', '-DskipTests', '--settings', 'maven-settings.xml'"
 install: true
+
+
 jdk:
 - openjdk8
 - openjdk9
@@ -23,9 +39,11 @@ matrix:
 stages:
 - test
 - deploy
+
 addons:
   sonarcloud:
     organization: joquijada-github
+
 jobs:
   include:
   - stage: test
@@ -37,12 +55,16 @@ jobs:
     script:
     - yarn global add https://github.com/conveyal/maven-semantic-release.git#e5551beb4ec266bb520ae5ff155bc0d04acf8f05
       semantic-release@15
+    # This is needed to create the Maven JAR that will get released
+    # TODO See if there's a way to cache the JAR created during the test stage
     - mvn package -Dmaven.test.skip=true
-    - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release
-      --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release
-      --verify-release @conveyal/maven-semantic-release
+    - semantic-release --prepare @conveyal/maven-semantic-release --publish @semantic-release/github,@conveyal/maven-semantic-release --verify-conditions @semantic-release/github,@conveyal/maven-semantic-release --verify-release @conveyal/maven-semantic-release --use-conveyal-workflow
     if: branch = master
+
+# This was added to keep Travis CI from assuming sudo identity, which then 
+# causes GPG signing problems
 sudo: false
+
 env:
   global:
   - secure: YA5r8QTTmf/0ft5+mtI7uJU0y6cTnCGLGSp+E4JLLSBNOjjY/j3aGHyhtOrZ9+h34EputnZvaMV04iLWzvuyqpXy7Z2FMRHTaRiSdYHeZcJOZbBRW8F3BnUp1cSeTI14/2KsxIQJ21W+kT1l2inRmPQd1cFL5REwNP1gSGjtNwvn9rhe36iN9CfThCjAbSEqdwWevAeg+7lMQQ+FBZ7TKatvegVit8a1ipwf7uMPYKZOb9SQW00Ap3LyPw3O2glQcPt48n0MC50SY7nA3xbCMf+Q7VOfgDWbnNb1Fcijt9qBtPCmZHGBWhEfP/Pd9U11bfa4A7FAWn80RFOO15KADGROyN4oA/Yh4FcLevb9H9HsXxYGkFcB2gA95HrIljr5trDU4qoj/pcc+OOyhskO3UYVL3CY1ZYMjwP9oDfaJNmCsI2VUCEPTnQeCXmBqJ1ju5wl5ZrOOKpC2sEhnQbk/rRha9xGjPbG5B1+UAaDVVcJVHBKko/x1JWVXnzHO/ITHJpf3M5eIJH6ilpeMlhNNyzxBEp3mhhjGWbcdx8VEN1ddCsHZ2bU77kP+LH1oQl0aVM6LIB01iQTExnhsA37Gf5NwF8u9LNVX6AjcEquV7c+wAaYjj8ebhqz/6kfa3WY7yKNEReKGEH+x9rPILaGIsjWUeEbc4YYN0hReMpV7lQ=
