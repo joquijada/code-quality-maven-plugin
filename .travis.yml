@@ -31,11 +31,13 @@ jdk:
 - openjdk11
 - openjdk12
 - openjdk13
+
 matrix:
   allow_failures:
     jdk:
     - openjdk12
     - openjdk13
+
 stages:
 - test
 - deploy
